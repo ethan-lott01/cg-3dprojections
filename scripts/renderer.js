@@ -1,6 +1,6 @@
 import * as CG from './transforms.js';
 import { Matrix, Vector } from "./matrix.js";
-//Abdullah and Ethan
+//Abdullah and Ethan 1
 
 const LEFT =   32; // binary 100000
 const RIGHT =  16; // binary 010000
