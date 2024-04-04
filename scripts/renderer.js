@@ -1,5 +1,6 @@
 import * as CG from './transforms.js';
 import { Matrix, Vector } from "./matrix.js";
+//Abdullah and Ethan
 
 const LEFT =   32; // binary 100000
 const RIGHT =  16; // binary 010000
@@ -18,7 +19,7 @@ class Renderer {
         this.canvas.height = canvas.height;
         this.ctx = this.canvas.getContext('2d');
         this.scene = this.processScene(scene);
-        this.enable_animation = false;  // <-- disabled for easier debugging; enable for animation
+        this.enable_animation = false;  // <-- disabled for easier debugging; enable for animation (Use the word True)
         this.start_time = null;
         this.prev_time = null;
     }
@@ -111,6 +112,7 @@ class Renderer {
         let out1 = this.outcodePerspective(p1, z_min);
         
         // TODO: implement clipping here!
+        //while loop (accept or reject)
         
         return result;
     }
