@@ -15,6 +15,10 @@ function mat4x4Perspective(prp, srp, vup, clip) {
 function mat4x4MPer() {
   let mper = new Matrix(4, 4);
   // mper.values = ...;
+  mper.values = [[1,0,0,0],
+                 [0,1,0,0],
+                 [0,0,1,0],
+                 [0,0,-1,0]]
   return mper;
 }
 
@@ -22,6 +26,10 @@ function mat4x4MPer() {
 function mat4x4Viewport(width, height) {
   let viewport = new Matrix(4, 4);
   // viewport.values = ...;
+  viewport.values = [[w/2, 0, 0, w/2],
+                     [0, h/2, 0, h/2],
+                     [0, 0, 1, 0],
+                     [0, 0, 0, 1]]
   return viewport;
 }
 
@@ -35,7 +43,7 @@ function mat4x4Identity(mat4x4) {
     [1, 0, 0, 0],
     [0, 1, 0, 0],
     [0, 0, 1, 0],
-    [0, 0, 0, 1],
+    [0, 0, 0, 1]
   ];
 }
 
@@ -46,7 +54,7 @@ function mat4x4Translate(mat4x4, tx, ty, tz) {
     [1, 0, 0, tx],
     [0, 1, 0, ty],
     [0, 0, 1, tz],
-    [0, 0, 0, 1],
+    [0, 0, 0, 1]
   ];
 }
 
@@ -57,7 +65,7 @@ function mat4x4Scale(mat4x4, sx, sy, sz) {
     [sx, 0, 0, 0],
     [0, sy, 0, 0],
     [0, 0, sz, 0],
-    [0, 0, 0, 1],
+    [0, 0, 0, 1]
   ];
 }
 
@@ -68,7 +76,7 @@ function mat4x4RotateX(mat4x4, theta) {
     [1, 0, 0, 0],
     [0, Math.cos(theta), -Math.sin(theta), 0],
     [0, Math.sin(theta), Math.cos(theta), 0],
-    [0, 0, 0, 1],
+    [0, 0, 0, 1]
   ];
 }
 
@@ -79,7 +87,7 @@ function mat4x4RotateY(mat4x4, theta) {
     [Math.cos(theta), 0, Math.sin(theta), 0],
     [0, 1, 0, 0],
     [-Math.sin(theta), 0, Math.cos(theta), 0],
-    [0, 0, 0, 1],
+    [0, 0, 0, 1]
   ];
 }
 
@@ -90,7 +98,7 @@ function mat4x4RotateZ(mat4x4, theta) {
     [Math.cos(theta), -Math.sin(theta), 0, 0],
     [Math.sin(theta), Math.cos(theta), 0, 0],
     [0, 0, 1, 0],
-    [0, 0, 0, 1],
+    [0, 0, 0, 1]
   ];
 }
 
@@ -101,7 +109,7 @@ function mat4x4ShearXY(mat4x4, shx, shy) {
     [1, 0, shx, 0],
     [0, 1, shy, 0],
     [0, 0, 1, 0],
-    [0, 0, 0, 1],
+    [0, 0, 0, 1]
   ];
 }
 
