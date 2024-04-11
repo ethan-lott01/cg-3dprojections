@@ -3,14 +3,40 @@ import { Matrix, Vector } from "./matrix.js";
 // create a 4x4 matrix to the perspective projection / view matrix
 function mat4x4Perspective(prp, srp, vup, clip) {
   // 1. translate PRP to origin
-  // 2. rotate VRC such that (u,v,n) align with (x,y,z)
-  // 3. shear such that CW is on the z-axis
-  // 4. scale such that view volume bounds are ([z,-z], [z,-z], [-1,zmin])
-  // ...
-  // let transform = Matrix.multiply([...]);
-  // return transform;
-    
+  let translateMatrix = mat4x4Translate(matrix, -prp.x, -prp.y, -prp.z);
 
+  // 2. rotate VRC such that (u,v,n) align with (x,y,z)
+  // calculate u, v, n for VRC
+  let n = normalize(prp.subtract(srp));
+  let u = normalize(vup.cross(n));
+  let v = n.cross(u);
+  let rotateMatrix = new Matrix(4, 4);
+  rotateMatrix.values = [[u.x, u.y, u.z, 0],
+                         [v.x, v.y, v.z, 0],
+                         [n.x, n.y, n.z, 0],
+                         [0, 0, 0, 1]];
+  
+  // 3. shear such that CW is on the z-axis
+  let CWx = (clip.left + clip.right) / 2;
+  let CWy = (clip.bottom + clip.top) / 2;
+  let CWz = -clip.near;
+  let shearMatrix = new Matrix(4, 4);
+  shearMatrix.values = [[1, 0, -CWx / CWz, 0],
+                        [0, 1, -CWy / CWz, 0],
+                        [0, 0, 1, 0],
+                        [0, 0, 0, 1]];
+
+  // 4. scale such that view volume bounds are ([z,-z], [z,-z], [-1,zmin])
+  let scaleMatrix = new Matrix(4, 4);
+  let scaleFactorX = (2 * clip.near) / ((clip.right - clip.left) * clip.far);
+  let scaleFactorY = (2 * clip.near) / ((clip.top - clip.bottom) * clip.far);
+  let scaleFactorZ = 1 / clip.far;
+  scaleMatrix = mat4x4Scale(scaleMatrix, scaleFactorX, scaleFactorY, scaleFactorZ);
+  let mper = mat4x4MPer();
+
+  // multiply all transforms together
+  let transform = Matrix.multiply([translateMatrix, rotateMatrix, shearMatrix, scaleMatrix, mper]);
+  return transform;
 }
 
 // create a 4x4 matrix to project a perspective image on the z=-1 plane
