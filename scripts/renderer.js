@@ -72,6 +72,14 @@ class Renderer {
         //     * project to 2D
         //     * translate/scale to viewport (i.e. window)
         //     * draw line
+        let theview = this.scene.view;
+        let NearPerMat = CG.mat4x4Perspective(theview.prp, theview.srp, theview.vup, theview.clip);
+        let WinPerMat = CG.mat4x4MPer();
+
+        //this is for each loop to loop through the models as long as i < this.scene.models
+        for(let Ind = 0; Ind < this.scene.models.length; Ind++){
+            let Models = this.scene.models[Ind];
+        }
     }
 
     // Get outcode for a vertex
