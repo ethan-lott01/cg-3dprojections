@@ -123,6 +123,30 @@ class Renderer {
         //     * project to 2D
         //     * translate/scale to viewport (i.e. window)
         //     * draw line
+        let Camera = CG.mat4x4Perspective(
+          this.scene.view.prp,
+          this.scene.view.srp,
+          this.scene.view.vup,
+          this.scene.view.clip
+        );
+        let mper = CG.mat4x4MPer();
+        let viewport = CG.mat4x4Viewport(this.canvas.width, this.canvas.height);
+    
+        for (let i = 0; i < this.scene.models.length; i++) {
+          let model = this.scene.models[i];
+          let vertices = [];
+    
+          for (let j = 0; j < model.vertices.length; j++) {
+            let vert = model.vertices[j];
+            let CameraVert = Matrix.multiply([Camera, vert]);
+            let mpercamvert = Matrix.multiply([mper, CameraVert]);
+            vertices.push(mpercamvert);
+          }
+          //   * For each line segment in each edge
+          //     * translate/scale to viewport (i.e. window)
+          //     * draw line
+          //CONTINUE...
+        }
     
   }
 
