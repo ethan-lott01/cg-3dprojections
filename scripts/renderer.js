@@ -31,32 +31,84 @@ class Renderer {
 
     //
     rotateLeft() {
+        console.log("Left");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+        let u = scene.view.vup.cross(n);
+        u.normalize();
+        let v = n.cross(u);
+        
+        let rotateMatrix = new Matrix(4, 4);
+        rotateMatrix.values = [[u.x, u.y, u.z, 0],
+                               [v.x, v.y, v.z, 0],
+                               [n.x, n.y, n.z, 0],
+                               [0, 0, 0, 1]];
 
     }
     
     //
     rotateRight() {
+        console.log("Right");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+        let u = scene.view.vup.cross(n);
+        u.normalize();
+
+        let rotateMatrix = new Matrix(4, 4);
+        rotateMatrix.values = [[u.x, u.y, u.z, 0],
+                               [v.x, v.y, v.z, 0],
+                               [n.x, n.y, n.z, 0],
+                               [0, 0, 0, 1]];
+        
+        
 
     }
     
-    //
+    // A key down
     moveLeft() {
+        console.log("A");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+        let u = scene.view.vup.cross(n);
+        u.normalize();
 
+        this.scene.view.prp = this.scene.view.prp.subtract(u);
+        this.scene.view.srp = this.scene.view.srp.subtract(u);
     }
     
-    //
+    // D key down
     moveRight() {
+        console.log("D");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+        let u = scene.view.vup.cross(n);
+        u.normalize();
 
+        this.scene.view.prp = this.scene.view.prp.add(u);
+        this.scene.view.srp = this.scene.view.srp.add(u);
     }
     
-    //
+    // S key down
     moveBackward() {
+        console.log("S");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+
+        this.scene.view.prp = this.scene.view.prp.add(n);
+        this.scene.view.srp = this.scene.view.srp.add(n);
 
     }
     
-    //
+    // W key down
     moveForward() {
+        console.log("W");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
 
+        this.scene.view.prp = this.scene.view.prp.subtract(n);
+        this.scene.view.srp = this.scene.view.srp.subtract(n);
+
+        // Do we have to redraw the scene after?
     }
 
     //
@@ -188,7 +240,7 @@ class Renderer {
                 }
             }
             else {
-                model.center = Vector4(scene.models[i].center[0],
+                model.center = CG.Vector4(scene.models[i].center[0],
                                        scene.models[i].center[1],
                                        scene.models[i].center[2],
                                        1);
