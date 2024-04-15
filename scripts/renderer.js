@@ -28,23 +28,87 @@ class Renderer {
     // TODO: update any transformations needed for animation
   }
 
-  //
-  rotateLeft() {}
+    //
+    rotateLeft() {
+        console.log("Left");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+        let u = scene.view.vup.cross(n);
+        u.normalize();
+        let v = n.cross(u);
+        
+        let rotateMatrix = new Matrix(4, 4);
+        rotateMatrix.values = [[u.x, u.y, u.z, 0],
+                               [v.x, v.y, v.z, 0],
+                               [n.x, n.y, n.z, 0],
+                               [0, 0, 0, 1]];
 
-  //
-  rotateRight() {}
+    }
+    
+    //
+    rotateRight() {
+        console.log("Right");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+        let u = scene.view.vup.cross(n);
+        u.normalize();
 
-  //
-  moveLeft() {}
+        let rotateMatrix = new Matrix(4, 4);
+        rotateMatrix.values = [[u.x, u.y, u.z, 0],
+                               [v.x, v.y, v.z, 0],
+                               [n.x, n.y, n.z, 0],
+                               [0, 0, 0, 1]];
+        
+        
 
-  //
-  moveRight() {}
+    }
+    
+    // A key down
+    moveLeft() {
+        console.log("A");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+        let u = scene.view.vup.cross(n);
+        u.normalize();
 
-  //
-  moveBackward() {}
+        this.scene.view.prp = this.scene.view.prp.subtract(u);
+        this.scene.view.srp = this.scene.view.srp.subtract(u);
+    }
+    
+    // D key down
+    moveRight() {
+        console.log("D");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+        let u = scene.view.vup.cross(n);
+        u.normalize();
 
-  //
-  moveForward() {}
+        this.scene.view.prp = this.scene.view.prp.add(u);
+        this.scene.view.srp = this.scene.view.srp.add(u);
+    }
+    
+    // S key down
+    moveBackward() {
+        console.log("S");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+
+        this.scene.view.prp = this.scene.view.prp.add(n);
+        this.scene.view.srp = this.scene.view.srp.add(n);
+
+    }
+    
+    // W key down
+    moveForward() {
+        console.log("W");
+        let n = scene.view.prp.subtract(scene.view.srp);
+        n.normalize();
+
+        this.scene.view.prp = this.scene.view.prp.subtract(n);
+        this.scene.view.srp = this.scene.view.srp.subtract(n);
+
+        // Do we have to redraw the scene after?
+    }
 
   //
   draw() {
@@ -59,32 +123,7 @@ class Renderer {
         //     * project to 2D
         //     * translate/scale to viewport (i.e. window)
         //     * draw line
-    let Camera = CG.mat4x4Perspective(
-      this.scene.view.prp,
-      this.scene.view.srp,
-      this.scene.view.vup,
-      this.scene.view.clip
-    );
-    let mper = CG.mat4x4MPer();
-    let viewport = CG.mat4x4Viewport(this.canvas.width, this.canvas.height);
-
     
-
-    for (let i = 0; i < this.scene.models.length; i++) {
-      let model = this.scene.models[i];
-      let vertices = [];
-      
-      for (let j = 0; j < model.vertices.length; j++) {
-        let vert = model.vertices[j];
-        let CameraVert = Matrix.multiply([Camera, vert]);
-        let mpercamvert = Matrix.multiply([mper, CameraVert]);
-        vertices.push(mpercamvert);
-      }
-      //   * For each line segment in each edge
-      //     * translate/scale to viewport (i.e. window)
-      //     * draw line
-      //CONTINUE...
-    }
   }
 
   // Get outcode for a vertex
@@ -185,43 +224,32 @@ class Renderer {
       models: [],
     };
 
-    for (let i = 0; i < scene.models.length; i++) {
-      let model = { type: scene.models[i].type };
-      if (model.type === "generic") {
-        model.vertices = [];
-        model.edges = JSON.parse(JSON.stringify(scene.models[i].edges));
-        for (let j = 0; j < scene.models[i].vertices.length; j++) {
-          model.vertices.push(
-            CG.Vector4(
-              scene.models[i].vertices[j][0],
-              scene.models[i].vertices[j][1],
-              scene.models[i].vertices[j][2],
-              1
-            )
-          );
-          if (scene.models[i].hasOwnProperty("animation")) {
-            model.animation = JSON.parse(
-              JSON.stringify(scene.models[i].animation)
-            );
-          }
-        }
-      } else {
-        model.center = CG.Vector4(
-          scene.models[i].center[0],
-          scene.models[i].center[1],
-          scene.models[i].center[2],
-          1
-        );
-        for (let key in scene.models[i]) {
-          if (
-            scene.models[i].hasOwnProperty(key) &&
-            key !== "type" &&
-            key != "center"
-          ) {
-            model[key] = JSON.parse(JSON.stringify(scene.models[i][key]));
-          }
-        }
-      }
+        for (let i = 0; i < scene.models.length; i++) {
+            let model = { type: scene.models[i].type };
+            if (model.type === 'generic') {
+                model.vertices = [];
+                model.edges = JSON.parse(JSON.stringify(scene.models[i].edges));
+                for (let j = 0; j < scene.models[i].vertices.length; j++) {
+                    model.vertices.push(CG.Vector4(scene.models[i].vertices[j][0],
+                                                   scene.models[i].vertices[j][1],
+                                                   scene.models[i].vertices[j][2],
+                                                   1));
+                    if (scene.models[i].hasOwnProperty('animation')) {
+                        model.animation = JSON.parse(JSON.stringify(scene.models[i].animation));
+                    }
+                }
+            }
+            else {
+                model.center = Vector4(scene.models[i].center[0],
+                                       scene.models[i].center[1],
+                                       scene.models[i].center[2],
+                                       1);
+                for (let key in scene.models[i]) {
+                    if (scene.models[i].hasOwnProperty(key) && key !== 'type' && key != 'center') {
+                        model[key] = JSON.parse(JSON.stringify(scene.models[i][key]));
+                    }
+                }
+            }
 
       model.matrix = new Matrix(4, 4);
       processed.models.push(model);
