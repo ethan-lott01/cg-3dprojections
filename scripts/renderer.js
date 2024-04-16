@@ -40,9 +40,21 @@ class Renderer {
 
     let rotateMatrix = new Matrix(3, 3);
     rotateMatrix.values = [
-      [Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)), v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)), v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta)],
-      [v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta), Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)), v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta)],
-      [v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta), v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta), Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta))]
+      [
+        Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)),
+        v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)),
+        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta),
+      ],
+      [
+        v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta),
+        Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)),
+        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta),
+      ],
+      [
+        v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta),
+        v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta),
+        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta)),
+      ],
     ];
 
     this.scene.view.srp = this.scene.view.srp.subtract(this.scene.view.prp);
@@ -62,9 +74,21 @@ class Renderer {
 
     let rotateMatrix = new Matrix(3, 3);
     rotateMatrix.values = [
-      [Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)), v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)), v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta)],
-      [v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta), Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)), v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta)],
-      [v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta), v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta), Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta))]
+      [
+        Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)),
+        v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)),
+        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta),
+      ],
+      [
+        v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta),
+        Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)),
+        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta),
+      ],
+      [
+        v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta),
+        v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta),
+        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta)),
+      ],
     ];
 
     this.scene.view.srp = this.scene.view.srp.subtract(this.scene.view.prp);
@@ -292,65 +316,69 @@ class Renderer {
           }
         }
       } else if (model.type === "cube") {
+        // Get cube center and dimensions
         const { center, width, height, depth } = scene.models[i];
-        const [cube_x, cube_y, cube_z] = center;
-        const width_half = width / 2,
-          height_half = height / 2,
-          depth_half = depth / 2;
+        const [xcube, ycube, zcube] = center;
+        const halfWidth = width / 2,
+          halfHeight = height / 2,
+          halfDepth = depth / 2;
 
+        // Define cube vertices based on the center and dimensions
         model.vertices = [
-          // Top
+          //  cube's Top
           CG.Vector4(
-            cube_x - width_half,
-            cube_y + height_half,
-            cube_z + depth_half,
+            xcube - halfWidth,
+            ycube + halfHeight,
+            zcube + halfDepth,
             1
-          ), // left-front
+          ), //  cube's left front
           CG.Vector4(
-            cube_x - width_half,
-            cube_y + height_half,
-            cube_z - depth_half,
+            xcube - halfWidth,
+            ycube + halfHeight,
+            zcube - halfDepth,
             1
-          ), // left-back
+          ), //  cube's left back
           CG.Vector4(
-            cube_x + width_half,
-            cube_y + height_half,
-            cube_z - depth_half,
+            xcube + halfWidth,
+            ycube + halfHeight,
+            zcube - halfDepth,
             1
-          ), // right-back
+          ), //  cube's right back
           CG.Vector4(
-            cube_x + width_half,
-            cube_y + height_half,
-            cube_z + depth_half,
+            xcube + halfWidth,
+            ycube + halfHeight,
+            zcube + halfDepth,
             1
-          ), // right-front
+          ), // cube's right front
 
           // Bottom
           CG.Vector4(
-            cube_x - width_half,
-            cube_y - height_half,
-            cube_z + depth_half,
+            xcube - halfWidth,
+            ycube - halfHeight,
+            zcube + halfDepth,
             1
           ), // left-front
           CG.Vector4(
-            cube_x - width_half,
-            cube_y - height_half,
-            cube_z - depth_half,
+            xcube - halfWidth,
+            ycube - halfHeight,
+            zcube - halfDepth,
             1
           ), // left-back
           CG.Vector4(
-            cube_x + width_half,
-            cube_y - height_half,
-            cube_z - depth_half,
+            xcube + halfWidth,
+            ycube - halfHeight,
+            zcube - halfDepth,
             1
           ), // right-back
           CG.Vector4(
-            cube_x + width_half,
-            cube_y - height_half,
-            cube_z + depth_half,
+            xcube + halfWidth,
+            ycube - halfHeight,
+            zcube + halfDepth,
             1
           ), // right-front
         ];
+
+        // Define cube edges based on the vertices
         model.edges = [
           // Top
           [0, 1],
@@ -371,47 +399,57 @@ class Renderer {
           [3, 7],
         ];
       } else if (model.type === "cylinder") {
+        // Get cylinder center, radius, height, and sides
         const { center, radius, height, sides } = scene.models[i];
-        const [cylinder_x, cylinder_y, cylinder_z] = center;
-        const hh = height / 2;
+        const [xCyl, yCyl, zCyl] = center;
+        const halfHeight = height / 2;
 
+        // Iterate through sides to create cylinder vertices and edges
         for (let j = 0; j < sides; j++) {
           const angle = (2 * Math.PI * j) / sides;
-          const x = cylinder_x + radius * Math.cos(angle);
-          const z = cylinder_z + radius * Math.sin(angle);
+          const x = xCyl + radius * Math.cos(angle);
+          const z = zCyl + radius * Math.sin(angle);
 
-          model.vertices.push(CG.Vector4(x, cylinder_y - hh, z, 1)); // Bottom circle vertex
-          model.vertices.push(CG.Vector4(x, cylinder_y + hh, z, 1)); // Top circle vertex
+          // Add bottom and top circle vertices
+          model.vertices.push(CG.Vector4(x, yCyl - halfHeight, z, 1)); // Bottom circle vertex
+          model.vertices.push(CG.Vector4(x, yCyl + halfHeight, z, 1)); // Top circle vertex
           model.edges.push([2 * j, 2 * j + 1]); // Side edges
 
+          // Connect vertices of current and previous sides
           if (j > 0) {
             model.edges.push([2 * j - 2, 2 * j]); // Connect bottom circle vertices
             model.edges.push([2 * j - 1, 2 * j + 1]); // Connect top circle vertices
           }
         }
+
+        // Connect the last side to complete the bottom and top circles
         model.edges.push([2 * (sides - 1), 0]); // Bottom circle
         model.edges.push([2 * (sides - 1) + 1, 1]); // Top circle
       } else if (model.type === "cone") {
+        // Get cone center, radius, height, and sides
         const { center, radius, height, sides } = scene.models[i];
-        const [cone_x, cone_y, cone_z] = center;
-        const hh = height;
+        const [xcone, ycone, zcone] = center;
+        const halfHeight = height;
 
-        // top point of the cone
-        model.vertices.push(CG.Vector4(cone_x, cone_y + hh, cone_z, 1));
+        // Add top point of the cone
+        model.vertices.push(CG.Vector4(xcone, ycone + halfHeight, zcone, 1));
 
+        // Iterate through sides to create cone vertices and edges
         for (let j = 0; j < sides; j++) {
           const angle = (2 * Math.PI * j) / sides;
-          const x = cone_x + radius * Math.cos(angle);
-          const z = cone_z + radius * Math.sin(angle);
+          const x = xcone + radius * Math.cos(angle);
+          const z = zcone + radius * Math.sin(angle);
 
-          model.vertices.push(CG.Vector4(x, cone_y, z, 1)); // Base circle vertices
+          // Add base circle vertices
+          model.vertices.push(CG.Vector4(x, ycone, z, 1));
           model.edges.push([0, j + 1]); // Connect point to each base vertex
 
+          // Connect base circle vertices
           if (j > 0) {
-            model.edges.push([j, j + 1]); // Connect base circle vertices
+            model.edges.push([j, j + 1]);
           }
         }
-        model.edges.push([sides, 1]);
+        model.edges.push([sides, 1]); // Connect last vertex to close the base circle
       } else {
         model.center = CG.Vector4(
           scene.models[i].center[0],
