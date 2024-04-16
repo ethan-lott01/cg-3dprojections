@@ -323,27 +323,6 @@ class Renderer {
             );
           }
         }
-      } else if (model.type === "cube") {
-        // cube model's properties from scene.model[i]
-        let { center, width, height, depth } = scene.models[i];
-        let [x, y, z] = center; //coordinates cube center
-        // half dimension calc
-        let halfWidth = width / 2;
-        let halfHeight = height / 2;
-        let halfDepth = depth / 2;
-
-        //vertex coordinates as arrays
-
-        let vertices = [
-          [x - halfWidth, y + halfHeight, z + halfDepth], // Top left-front
-          [x - halfWidth, y + halfHeight, z - halfDepth], // Top left-back
-          [x + halfWidth, y + halfHeight, z - halfDepth], // Top right-back
-          [x + halfWidth, y + halfHeight, z + halfDepth], // Top right-front
-          [x - halfWidth, y - halfHeight, z + halfDepth], // Bottom left-front
-          [x - halfWidth, y - halfHeight, z - halfDepth], // Bottom left-back
-          [x + halfWidth, y - halfHeight, z - halfDepth], // Bottom right-back
-          [x + halfWidth, y - halfHeight, z + halfDepth], // Bottom right-front
-        ];
       } else {
         model.center = CG.Vector4(
           scene.models[i].center[0],
