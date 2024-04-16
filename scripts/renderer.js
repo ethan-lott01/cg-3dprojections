@@ -281,8 +281,10 @@ class Renderer {
 
   //
   processScene(scene) {
+    // Initialize the processed scene object with view properties and an empty models array
     let processed = {
       view: {
+        // Parse and set perspective properties
         prp: CG.Vector3(
           scene.view.prp[0],
           scene.view.prp[1],
@@ -303,12 +305,15 @@ class Renderer {
       models: [],
     };
 
+    // Process each model in the scene
     for (let i = 0; i < scene.models.length; i++) {
       let model = { type: scene.models[i].type, vertices: [], edges: [] };
+
       if (model.type === "generic") {
-        model.vertices = [];
+        // Process generic model with deep copy of edges and vertices
         model.edges = JSON.parse(JSON.stringify(scene.models[i].edges));
         for (let j = 0; j < scene.models[i].vertices.length; j++) {
+          // Parse vertices for generic model
           model.vertices.push(
             CG.Vector4(
               scene.models[i].vertices[j][0],
@@ -318,102 +323,106 @@ class Renderer {
             )
           );
           if (scene.models[i].hasOwnProperty("animation")) {
+            // Deep copy animation properties if available
             model.animation = JSON.parse(
               JSON.stringify(scene.models[i].animation)
             );
           }
         }
       } else if (model.type === "cube") {
+        // Process cube model
         const { center, width, height, depth } = scene.models[i];
-        const [cube_x, cube_y, cube_z] = center;
-        const width_half = width / 2,
-          height_half = height / 2,
-          depth_half = depth / 2;
+        const [xcube, ycube, zcube] = center;
+        const halfWidth = width / 2,
+          halfHeight = height / 2,
+          halfDepth = depth / 2;
 
+        // Define vertices for cube model
         model.vertices = [
-          // Top
+          // Top face
           CG.Vector4(
-            cube_x - width_half,
-            cube_y + height_half,
-            cube_z + depth_half,
+            xcube - halfWidth,
+            ycube + halfHeight,
+            zcube + halfDepth,
             1
           ), // left-front
           CG.Vector4(
-            cube_x - width_half,
-            cube_y + height_half,
-            cube_z - depth_half,
+            xcube - halfWidth,
+            ycube + halfHeight,
+            zcube - halfDepth,
             1
           ), // left-back
           CG.Vector4(
-            cube_x + width_half,
-            cube_y + height_half,
-            cube_z - depth_half,
+            xcube + halfWidth,
+            ycube + halfHeight,
+            zcube - halfDepth,
             1
           ), // right-back
           CG.Vector4(
-            cube_x + width_half,
-            cube_y + height_half,
-            cube_z + depth_half,
+            xcube + halfWidth,
+            ycube + halfHeight,
+            zcube + halfDepth,
             1
           ), // right-front
-
-          // Bottom
+          // Bottom face
           CG.Vector4(
-            cube_x - width_half,
-            cube_y - height_half,
-            cube_z + depth_half,
+            xcube - halfWidth,
+            ycube - halfHeight,
+            zcube + halfDepth,
             1
           ), // left-front
           CG.Vector4(
-            cube_x - width_half,
-            cube_y - height_half,
-            cube_z - depth_half,
+            xcube - halfWidth,
+            ycube - halfHeight,
+            zcube - halfDepth,
             1
           ), // left-back
           CG.Vector4(
-            cube_x + width_half,
-            cube_y - height_half,
-            cube_z - depth_half,
+            xcube + halfWidth,
+            ycube - halfHeight,
+            zcube - halfDepth,
             1
           ), // right-back
           CG.Vector4(
-            cube_x + width_half,
-            cube_y - height_half,
-            cube_z + depth_half,
+            xcube + halfWidth,
+            ycube - halfHeight,
+            zcube + halfDepth,
             1
           ), // right-front
         ];
+        // Define edges for cube model
         model.edges = [
-          // Top
+          // Top face
           [0, 1],
           [1, 2],
           [2, 3],
           [3, 0],
-
-          // Bottom
+          // Bottom face
           [4, 5],
           [5, 6],
           [6, 7],
           [7, 4],
-
-          // Sides
+          // Side edges
           [0, 4],
           [1, 5],
           [2, 6],
           [3, 7],
         ];
       } else if (model.type === "cylinder") {
+        // Process cylinder model
         const { center, radius, height, sides } = scene.models[i];
-        const [cylinder_x, cylinder_y, cylinder_z] = center;
-        const hh = height / 2;
+        const [cylx, cyly, cylz] = center;
+        const halfHeight = height / 2;
 
+        // Define vertices and edges for cylinder model
         for (let j = 0; j < sides; j++) {
           const angle = (2 * Math.PI * j) / sides;
-          const x = cylinder_x + radius * Math.cos(angle);
-          const z = cylinder_z + radius * Math.sin(angle);
+          const x = cylx + radius * Math.cos(angle);
+          const z = cylz + radius * Math.sin(angle);
 
-          model.vertices.push(CG.Vector4(x, cylinder_y - hh, z, 1)); // Bottom circle vertex
-          model.vertices.push(CG.Vector4(x, cylinder_y + hh, z, 1)); // Top circle vertex
+          // Add bottom and top circle vertices
+          model.vertices.push(CG.Vector4(x, cyly - halfHeight, z, 1)); // Bottom circle vertex
+          model.vertices.push(CG.Vector4(x, cyly + halfHeight, z, 1)); // Top circle vertex
           model.edges.push([2 * j, 2 * j + 1]); // Side edges
 
           if (j > 0) {
@@ -421,29 +430,32 @@ class Renderer {
             model.edges.push([2 * j - 1, 2 * j + 1]); // Connect top circle vertices
           }
         }
-        model.edges.push([2 * (sides - 1), 0]); // Bottom circle
-        model.edges.push([2 * (sides - 1) + 1, 1]); // Top circle
+        model.edges.push([2 * (sides - 1), 0]); // Bottom circle closing edge
+        model.edges.push([2 * (sides - 1) + 1, 1]); // Top circle closing edge
       } else if (model.type === "cone") {
+        // Process cone model
         const { center, radius, height, sides } = scene.models[i];
-        const [cone_x, cone_y, cone_z] = center;
-        const hh = height;
+        const [xcone, ycone, zcone] = center;
+        const halfHeight = height;
 
-        // top point of the cone
-        model.vertices.push(CG.Vector4(cone_x, cone_y + hh, cone_z, 1));
+        // Define vertices and edges for cone model
+        // Add top vertex
+        model.vertices.push(CG.Vector4(xcone, ycone + halfHeight, zcone, 1));
 
         for (let j = 0; j < sides; j++) {
           const angle = (2 * Math.PI * j) / sides;
-          const x = cone_x + radius * Math.cos(angle);
-          const z = cone_z + radius * Math.sin(angle);
+          const x = xcone + radius * Math.cos(angle);
+          const z = zcone + radius * Math.sin(angle);
 
-          model.vertices.push(CG.Vector4(x, cone_y, z, 1)); // Base circle vertices
-          model.edges.push([0, j + 1]); // Connect point to each base vertex
+          // Add base circle vertices
+          model.vertices.push(CG.Vector4(x, ycone, z, 1));
+          model.edges.push([0, j + 1]); // Connect top point to each base vertex
 
           if (j > 0) {
             model.edges.push([j, j + 1]); // Connect base circle vertices
           }
         }
-        model.edges.push([sides, 1]);
+        model.edges.push([sides, 1]); // Closing edge to complete base circle
       } else {
         model.center = CG.Vector4(
           scene.models[i].center[0],
@@ -455,7 +467,7 @@ class Renderer {
           if (
             scene.models[i].hasOwnProperty(key) &&
             key !== "type" &&
-            key != "center"
+            key !== "center"
           ) {
             model[key] = JSON.parse(JSON.stringify(scene.models[i][key]));
           }
@@ -485,4 +497,5 @@ class Renderer {
     this.ctx.fillRect(x1 - 2, y1 - 2, 4, 4);
   }
 }
+
 export { Renderer };
