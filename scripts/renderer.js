@@ -36,14 +36,29 @@ class Renderer {
     let u = this.scene.view.vup.cross(n);
     u.normalize();
     let v = n.cross(u);
-    let theta = Math.PI/16;
+    let theta = Math.PI / 16;
 
     let rotateMatrix = new Matrix(4, 4);
     rotateMatrix.values = [
-      [Math.cos(theta)+Math.pow(v.x,2)*(1-Math.cos(theta)), v.x*v.y*(1-Math.cos(theta)-v.z*Math.sin(theta)), v.x*v.z*(1-Math.cos(theta))+v.y*Math.sin(theta), 0],
-      [v.y*v.x*(1-Math.cos(theta))+v.z*Math.sin(theta), Math.cos(theta)+Math.pow(v.y,2)*(1-Math.cos(theta)), v.y*v.z*(1-Math.cos(theta))-v.x*Math.sin(theta), 0],
-      [v.z*v.x*(1-Math.cos(theta))-v.y*Math.sin(theta), v.z*v.y*(1-Math.cos(theta))+v.x*Math.sin(theta), Math.cos(theta)+Math.pow(v.z,2)*(1-Math.cos(theta)), 0],
-      [0, 0, 0, 1]
+      [
+        Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)),
+        v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)),
+        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta),
+        0,
+      ],
+      [
+        v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta),
+        Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)),
+        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta),
+        0,
+      ],
+      [
+        v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta),
+        v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta),
+        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta)),
+        0,
+      ],
+      [0, 0, 0, 1],
     ];
 
     this.scene.view.srp = this.scene.view.srp.subtract(this.scene.view.prp);
@@ -59,14 +74,29 @@ class Renderer {
     let u = this.scene.view.vup.cross(n);
     u.normalize();
     let v = n.cross(u);
-    let theta = -(Math.PI/16);
+    let theta = -(Math.PI / 16);
 
     let rotateMatrix = new Matrix(4, 4);
     rotateMatrix.values = [
-      [Math.cos(theta)+Math.pow(v.x,2)*(1-Math.cos(theta)), v.x*v.y*(1-Math.cos(theta)-v.z*Math.sin(theta)), v.x*v.z*(1-Math.cos(theta))+v.y*Math.sin(theta), 0],
-      [v.y*v.x*(1-Math.cos(theta))+v.z*Math.sin(theta), Math.cos(theta)+Math.pow(v.y,2)*(1-Math.cos(theta)), v.y*v.z*(1-Math.cos(theta))-v.x*Math.sin(theta), 0],
-      [v.z*v.x*(1-Math.cos(theta))-v.y*Math.sin(theta), v.z*v.y*(1-Math.cos(theta))+v.x*Math.sin(theta), Math.cos(theta)+Math.pow(v.z,2)*(1-Math.cos(theta)), 0],
-      [0, 0, 0, 1]
+      [
+        Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)),
+        v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)),
+        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta),
+        0,
+      ],
+      [
+        v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta),
+        Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)),
+        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta),
+        0,
+      ],
+      [
+        v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta),
+        v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta),
+        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta)),
+        0,
+      ],
+      [0, 0, 0, 1],
     ];
 
     this.scene.view.srp = this.scene.view.srp.subtract(this.scene.view.prp);
@@ -293,6 +323,9 @@ class Renderer {
             );
           }
         }
+      } else if (model.type === "cube") {
+        //getting any cube model's properties from scene.model[i]
+        let { center, width, height, depth } = scene.models[i];
       } else {
         model.center = CG.Vector4(
           scene.models[i].center[0],
