@@ -323,9 +323,6 @@ class Renderer {
             );
           }
         }
-      } else if (model.type === "cube") {
-        //getting any cube model's properties from scene.model[i]
-        let { center, width, height, depth } = scene.models[i];
       } else {
         model.center = CG.Vector4(
           scene.models[i].center[0],
