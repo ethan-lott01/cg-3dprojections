@@ -31,44 +31,55 @@ class Renderer {
   //
   rotateLeft() {
     console.log("Left");
-    let n = scene.view.prp.subtract(scene.view.srp);
+    let n = this.scene.view.prp.subtract(this.scene.view.srp);
     n.normalize();
-    let u = scene.view.vup.cross(n);
+    let u = this.scene.view.vup.cross(n);
     u.normalize();
     let v = n.cross(u);
+    let theta = Math.PI/16;
 
     let rotateMatrix = new Matrix(4, 4);
     rotateMatrix.values = [
-      [u.x, u.y, u.z, 0],
-      [v.x, v.y, v.z, 0],
-      [n.x, n.y, n.z, 0],
-      [0, 0, 0, 1],
+      [Math.cos(theta)+Math.pow(v.x,2)*(1-Math.cos(theta)), v.x*v.y*(1-Math.cos(theta)-v.z*Math.sin(theta)), v.x*v.z*(1-Math.cos(theta))+v.y*Math.sin(theta), 0],
+      [v.y*v.x*(1-Math.cos(theta))+v.z*Math.sin(theta), Math.cos(theta)+Math.pow(v.y,2)*(1-Math.cos(theta)), v.y*v.z*(1-Math.cos(theta))-v.x*Math.sin(theta), 0],
+      [v.z*v.x*(1-Math.cos(theta))-v.y*Math.sin(theta), v.z*v.y*(1-Math.cos(theta))+v.x*Math.sin(theta), Math.cos(theta)+Math.pow(v.z,2)*(1-Math.cos(theta)), 0],
+      [0, 0, 0, 1]
     ];
+
+    this.scene.view.srp = this.scene.view.srp.subtract(this.scene.view.prp);
+    this.scene.view.srp = Matrix.multiply([rotateMatrix, this.scene.view.srp]);
+    this.scene.view.srp = this.scene.view.srp.add(this.scene.view.prp);
   }
 
   //
   rotateRight() {
     console.log("Right");
-    let n = scene.view.prp.subtract(scene.view.srp);
+    let n = this.scene.view.prp.subtract(this.scene.view.srp);
     n.normalize();
-    let u = scene.view.vup.cross(n);
+    let u = this.scene.view.vup.cross(n);
     u.normalize();
+    let v = n.cross(u);
+    let theta = -(Math.PI/16);
 
     let rotateMatrix = new Matrix(4, 4);
     rotateMatrix.values = [
-      [u.x, u.y, u.z, 0],
-      [v.x, v.y, v.z, 0],
-      [n.x, n.y, n.z, 0],
-      [0, 0, 0, 1],
+      [Math.cos(theta)+Math.pow(v.x,2)*(1-Math.cos(theta)), v.x*v.y*(1-Math.cos(theta)-v.z*Math.sin(theta)), v.x*v.z*(1-Math.cos(theta))+v.y*Math.sin(theta), 0],
+      [v.y*v.x*(1-Math.cos(theta))+v.z*Math.sin(theta), Math.cos(theta)+Math.pow(v.y,2)*(1-Math.cos(theta)), v.y*v.z*(1-Math.cos(theta))-v.x*Math.sin(theta), 0],
+      [v.z*v.x*(1-Math.cos(theta))-v.y*Math.sin(theta), v.z*v.y*(1-Math.cos(theta))+v.x*Math.sin(theta), Math.cos(theta)+Math.pow(v.z,2)*(1-Math.cos(theta)), 0],
+      [0, 0, 0, 1]
     ];
+
+    this.scene.view.srp = this.scene.view.srp.subtract(this.scene.view.prp);
+    this.scene.view.srp = Matrix.multiply([rotateMatrix, this.scene.view.srp]);
+    this.scene.view.srp = this.scene.view.srp.add(this.scene.view.prp);
   }
 
   // A key down
   moveLeft() {
     console.log("A");
-    let n = scene.view.prp.subtract(scene.view.srp);
+    let n = this.scene.view.prp.subtract(this.scene.view.srp);
     n.normalize();
-    let u = scene.view.vup.cross(n);
+    let u = this.scene.view.vup.cross(n);
     u.normalize();
 
     this.scene.view.prp = this.scene.view.prp.subtract(u);
@@ -78,9 +89,9 @@ class Renderer {
   // D key down
   moveRight() {
     console.log("D");
-    let n = scene.view.prp.subtract(scene.view.srp);
+    let n = this.scene.view.prp.subtract(this.scene.view.srp);
     n.normalize();
-    let u = scene.view.vup.cross(n);
+    let u = this.scene.view.vup.cross(n);
     u.normalize();
 
     this.scene.view.prp = this.scene.view.prp.add(u);
@@ -90,7 +101,7 @@ class Renderer {
   // S key down
   moveBackward() {
     console.log("S");
-    let n = scene.view.prp.subtract(scene.view.srp);
+    let n = this.scene.view.prp.subtract(this.scene.view.srp);
     n.normalize();
 
     this.scene.view.prp = this.scene.view.prp.add(n);
@@ -100,13 +111,11 @@ class Renderer {
   // W key down
   moveForward() {
     console.log("W");
-    let n = scene.view.prp.subtract(scene.view.srp);
+    let n = this.scene.view.prp.subtract(this.scene.view.srp);
     n.normalize();
 
     this.scene.view.prp = this.scene.view.prp.subtract(n);
     this.scene.view.srp = this.scene.view.srp.subtract(n);
-
-    // Do we have to redraw the scene after?
   }
 
   //
@@ -195,8 +204,8 @@ class Renderer {
   // z_min:        float (near clipping plane in canonical view volume)
   clipLinePerspective(line, z_min) {
     let result = null;
-    let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z);
-    let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
+    let p0 = CG.Vector3(line.pt0.x, line.pt0.y, line.pt0.z);
+    let p1 = CG.Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
     let out0 = this.outcodePerspective(p0, z_min);
     let out1 = this.outcodePerspective(p1, z_min);
 
@@ -285,7 +294,7 @@ class Renderer {
           }
         }
       } else {
-        model.center = Vector4(
+        model.center = CG.Vector4(
           scene.models[i].center[0],
           scene.models[i].center[1],
           scene.models[i].center[2],
