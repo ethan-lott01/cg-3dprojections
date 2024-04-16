@@ -304,7 +304,7 @@ class Renderer {
     };
 
     for (let i = 0; i < scene.models.length; i++) {
-      let model = { type: scene.models[i].type };
+      let model = { type: scene.models[i].type, vertices: [], edges: [] };
       if (model.type === "generic") {
         model.vertices = [];
         model.edges = JSON.parse(JSON.stringify(scene.models[i].edges));
@@ -323,6 +323,127 @@ class Renderer {
             );
           }
         }
+      } else if (model.type === "cube") {
+        const { center, width, height, depth } = scene.models[i];
+        const [cube_x, cube_y, cube_z] = center;
+        const width_half = width / 2,
+          height_half = height / 2,
+          depth_half = depth / 2;
+
+        model.vertices = [
+          // Top
+          CG.Vector4(
+            cube_x - width_half,
+            cube_y + height_half,
+            cube_z + depth_half,
+            1
+          ), // left-front
+          CG.Vector4(
+            cube_x - width_half,
+            cube_y + height_half,
+            cube_z - depth_half,
+            1
+          ), // left-back
+          CG.Vector4(
+            cube_x + width_half,
+            cube_y + height_half,
+            cube_z - depth_half,
+            1
+          ), // right-back
+          CG.Vector4(
+            cube_x + width_half,
+            cube_y + height_half,
+            cube_z + depth_half,
+            1
+          ), // right-front
+
+          // Bottom
+          CG.Vector4(
+            cube_x - width_half,
+            cube_y - height_half,
+            cube_z + depth_half,
+            1
+          ), // left-front
+          CG.Vector4(
+            cube_x - width_half,
+            cube_y - height_half,
+            cube_z - depth_half,
+            1
+          ), // left-back
+          CG.Vector4(
+            cube_x + width_half,
+            cube_y - height_half,
+            cube_z - depth_half,
+            1
+          ), // right-back
+          CG.Vector4(
+            cube_x + width_half,
+            cube_y - height_half,
+            cube_z + depth_half,
+            1
+          ), // right-front
+        ];
+        model.edges = [
+          // Top
+          [0, 1],
+          [1, 2],
+          [2, 3],
+          [3, 0],
+
+          // Bottom
+          [4, 5],
+          [5, 6],
+          [6, 7],
+          [7, 4],
+
+          // Sides
+          [0, 4],
+          [1, 5],
+          [2, 6],
+          [3, 7],
+        ];
+      } else if (model.type === "cylinder") {
+        const { center, radius, height, sides } = scene.models[i];
+        const [cylinder_x, cylinder_y, cylinder_z] = center;
+        const hh = height / 2;
+
+        for (let j = 0; j < sides; j++) {
+          const angle = (2 * Math.PI * j) / sides;
+          const x = cylinder_x + radius * Math.cos(angle);
+          const z = cylinder_z + radius * Math.sin(angle);
+
+          model.vertices.push(CG.Vector4(x, cylinder_y - hh, z, 1)); // Bottom circle vertex
+          model.vertices.push(CG.Vector4(x, cylinder_y + hh, z, 1)); // Top circle vertex
+          model.edges.push([2 * j, 2 * j + 1]); // Side edges
+
+          if (j > 0) {
+            model.edges.push([2 * j - 2, 2 * j]); // Connect bottom circle vertices
+            model.edges.push([2 * j - 1, 2 * j + 1]); // Connect top circle vertices
+          }
+        }
+        model.edges.push([2 * (sides - 1), 0]); // Bottom circle
+        model.edges.push([2 * (sides - 1) + 1, 1]); // Top circle
+      } else if (model.type === "cone") {
+        const { center, radius, height, sides } = scene.models[i];
+        const [cone_x, cone_y, cone_z] = center;
+        const hh = height;
+
+        // top point of the cone
+        model.vertices.push(CG.Vector4(cone_x, cone_y + hh, cone_z, 1));
+
+        for (let j = 0; j < sides; j++) {
+          const angle = (2 * Math.PI * j) / sides;
+          const x = cone_x + radius * Math.cos(angle);
+          const z = cone_z + radius * Math.sin(angle);
+
+          model.vertices.push(CG.Vector4(x, cone_y, z, 1)); // Base circle vertices
+          model.edges.push([0, j + 1]); // Connect point to each base vertex
+
+          if (j > 0) {
+            model.edges.push([j, j + 1]); // Connect base circle vertices
+          }
+        }
+        model.edges.push([sides, 1]);
       } else {
         model.center = CG.Vector4(
           scene.models[i].center[0],
@@ -364,5 +485,4 @@ class Renderer {
     this.ctx.fillRect(x1 - 2, y1 - 2, 4, 4);
   }
 }
-
 export { Renderer };
