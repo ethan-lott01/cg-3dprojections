@@ -43,17 +43,17 @@ class Renderer {
       [
         Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)),
         v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)),
-        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta),
+        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta)
       ],
       [
         v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta),
         Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)),
-        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta),
+        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta)
       ],
       [
         v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta),
         v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta),
-        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta)),
+        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta))
       ],
     ];
 
@@ -169,8 +169,7 @@ class Renderer {
       for (j = 0; j < model.vertices.length; j++) {
         let vert = model.vertices[j];
         let CameraVert = Matrix.multiply([Camera, vert]);
-        let mpercamvert = Matrix.multiply([mper, CameraVert]);
-        vertices.push(mpercamvert);
+        vertices.push(CameraVert);
       }
       //   * For each line segment in each edge
       //     * translate/scale to viewport (i.e. window)
@@ -181,10 +180,12 @@ class Renderer {
         let ev;
         for (ev = 0; ev < edges.length - 1; ev++) {
           let vert_1 = vertices[edges[ev]];
-          let vert_2 = vertices[edges[ev + 1]];
+          let vert_2 = vertices[edges[ev +1]];
+          
 
-          let viewport_1 = Matrix.multiply([viewport, vert_1]);
-          let viewport_2 = Matrix.multiply([viewport, vert_2]);
+          let viewport_1 = Matrix.multiply([viewport,  mper, vert_1]);
+          let viewport_2 = Matrix.multiply([viewport, mper, vert_2]);
+          
           //convert from Homogenous to cartesian
           this.drawLine(
             viewport_1.x / viewport_1.w,
@@ -321,7 +322,7 @@ class Renderer {
         const [xcube, ycube, zcube] = center;
         const halfWidth = width / 2,
           halfHeight = height / 2,
-          halfDepth = depth / 2;
+          halfDepth = depth / 8;
 
         // Define cube vertices based on the center and dimensions
         model.vertices = [
@@ -450,8 +451,18 @@ class Renderer {
           }
         }
         model.edges.push([sides, 1]); // Connect last vertex to close the base circle
-      }else if(model.type === "sphere"){ //CONTINUE LATER Sphere or during class with partner
-
+      } else if (model.type === "sphere") {
+        //CONTINUE LATER Sphere or during class with partner
+        const {center,radius,verttcircles,horzcircles} = model.scene[i];
+        const {Xsph,Ysph,Zsph} = center;
+        for(let horzcircle = 0; horzcircle <= horzcircles; horzcircle ++){
+          let horzcircle_ = Math.PI * horzcircle / horzcircles;
+          let horzcos = Math.cos(horzcircle_) * radius + Ysph;
+        
+        }
+        for(let verttcircle = 0; verttcircle <= verttcircles ; verttcircle++){
+            //CONTINUE
+        }
       } else {
         model.center = CG.Vector4(
           scene.models[i].center[0],
