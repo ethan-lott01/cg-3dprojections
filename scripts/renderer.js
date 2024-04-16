@@ -325,7 +325,7 @@ class Renderer {
 
         // Define cube vertices based on the center and dimensions
         model.vertices = [
-          //  cube's Top
+          // cube's Top
           CG.Vector4(
             xcube - halfWidth,
             ycube + halfHeight,
@@ -450,6 +450,8 @@ class Renderer {
           }
         }
         model.edges.push([sides, 1]); // Connect last vertex to close the base circle
+      }else if(model.type === "sphere"){ //CONTINUE LATER Sphere or during class with partner
+
       } else {
         model.center = CG.Vector4(
           scene.models[i].center[0],
