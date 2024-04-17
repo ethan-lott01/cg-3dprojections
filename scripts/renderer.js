@@ -462,6 +462,7 @@ class Renderer {
         }
         for(let verttcircle = 0; verttcircle <= verttcircles ; verttcircle++){
             //CONTINUE
+            //test github issue
         }
       } else {
         model.center = CG.Vector4(
