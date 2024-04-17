@@ -21,6 +21,13 @@
       "sides": 100
     },
     {
+      "type": "sphere",
+      "center": [30, 20, -5],
+      "radius": 2,
+      "verticalcircles": 10,
+      "horizcircles": 10
+    },
+    {
       "type": "cylinder",
       "center": [30, 5, -5],
       "radius": 1.5,

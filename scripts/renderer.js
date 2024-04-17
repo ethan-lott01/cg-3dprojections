@@ -43,17 +43,17 @@ class Renderer {
       [
         Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)),
         v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)),
-        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta)
+        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta),
       ],
       [
         v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta),
         Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)),
-        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta)
+        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta),
       ],
       [
         v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta),
         v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta),
-        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta))
+        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta)),
       ],
     ];
 
@@ -180,12 +180,11 @@ class Renderer {
         let ev;
         for (ev = 0; ev < edges.length - 1; ev++) {
           let vert_1 = vertices[edges[ev]];
-          let vert_2 = vertices[edges[ev +1]];
-          
+          let vert_2 = vertices[edges[ev + 1]];
 
-          let viewport_1 = Matrix.multiply([viewport,  mper, vert_1]);
+          let viewport_1 = Matrix.multiply([viewport, mper, vert_1]);
           let viewport_2 = Matrix.multiply([viewport, mper, vert_2]);
-          
+
           //convert from Homogenous to cartesian
           this.drawLine(
             viewport_1.x / viewport_1.w,
@@ -452,17 +451,51 @@ class Renderer {
         }
         model.edges.push([sides, 1]); // Connect last vertex to close the base circle
       } else if (model.type === "sphere") {
-        //CONTINUE LATER Sphere or during class with partner
-        const {center,radius,verttcircles,horzcircles} = model.scene[i];
-        const {Xsph,Ysph,Zsph} = center;
-        for(let horzcircle = 0; horzcircle <= horzcircles; horzcircle ++){
-          let horzcircle_ = Math.PI * horzcircle / horzcircles;
-          let horzcos = Math.cos(horzcircle_) * radius + Ysph;
-        
-        }
-        for(let verttcircle = 0; verttcircle <= verttcircles ; verttcircle++){
-            //CONTINUE
-            //test github issue
+        const { center, radius, verticalcircles, horizcircles } =
+          scene.models[i];
+        const [Xsph, Ysph, Zsph] = center;
+
+        // Iterate through horizontal circles (stacks) and vertical circles (slices) to create the sphere
+        for (let horizcircle = 0; horizcircle <= horizcircles; horizcircle++) {
+          // Calculate the vertical angle for the current horizontal circle
+          const verticalAngle = (Math.PI * horizcircle) / horizcircles;
+          const y = Ysph + radius * Math.cos(verticalAngle); // Calculate y-coordinate for the current horizontal circle
+
+          // Iterate through vertical circles (slices) around the sphere
+          for (
+            let verticalcircle = 0;
+            verticalcircle <= verticalcircles;
+            verticalcircle++
+          ) {
+            // Calculate the horizontal angle for the current vertical circle
+            const horizontalAngle =
+              (2 * Math.PI * verticalcircle) / verticalcircles;
+
+            // Compute the x, z coordinates for the vertex on the sphere's surface
+            const x =
+              Xsph +
+              radius * Math.sin(verticalAngle) * Math.cos(horizontalAngle);
+            const z =
+              Zsph +
+              radius * Math.sin(verticalAngle) * Math.sin(horizontalAngle);
+
+            // Add the vertex to the model's vertices list
+            model.vertices.push(CG.Vector4(x, y, z, 1));
+
+            // Connect vertices within the same horizontal circle and with vertices in the next horizontal circle
+            if (
+              horizcircle < horizcircles &&
+              verticalcircle < verticalcircles
+            ) {
+              const currindex =
+                horizcircle * (verticalcircles + 1) + verticalcircle;
+              const nextindex = currindex + verticalcircles + 1;
+
+              // Create edges to connect vertices
+              model.edges.push([currindex, currindex + 1]); // Connect vertices within the same horizontal circle
+              model.edges.push([currindex, nextindex]); // Connect vertices with the corresponding vertex in the next horizontal circle
+            }
+          }
         }
       } else {
         model.center = CG.Vector4(
