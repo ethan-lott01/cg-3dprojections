@@ -266,27 +266,37 @@ class Renderer {
     let out0 = this.outcodePerspective(p0, z_min);
     let out1 = this.outcodePerspective(p1, z_min);
 
-    while (true) {
-      // Both endpoints inside, accept
-      if (out0 === INSIDE && out1 === INSIDE) {
-        result = {pt0: line.pt0, pt1: line.pt1};
-        break;
+    // Returned line needs to have Vector4 points
+    let clippedLine = {pt0: CG.Vector4(line.pt0.x, line.pt0.y, line.pt0.z, 1), pt1: CG.Vector4(line.pt1.x, line.pt1.y, line.pt1.z, 1)};
+    
+    // Bitwise AND != 0 can trivially reject
+    let reject = out0 & out1;
+    // Bitwise OR = 0 can trivially accept
+    let accept = out0 | out1;
+    
+    while(accept != INSIDE) { // Both endpoints are NOT within view
+      // Recalculate variables (endpoints and outcodes may have changed)
+      p0 = CG.Vector3(clippedLine.pt0.x, clippedLine.pt0.y, clippedLine.pt0.z);
+      p1 = CG.Vector3(clippedLine.pt1.x, clippedLine.pt1.y, clippedLine.pt1.z);
+      out0 = this.outcodePerspective(p0, z_min);
+      out1 = this.outcodePerspective(p1, z_min);
+      reject = out0 & out1;
+      accept = out0 | out1;
+      
+      if(reject != INSIDE) { // Both endpoints are outside the same edge
+        // Keeps result = null;
+        return result;
       }
-
-      // Both endpoints share an outside region, reject
-      if (out0 & out1) {
-        // keeps result = null;
-        break;
-      }
-
-      // One endpoint outside, calculate intersection point
+      
+      // One endpoint is outside the view, calculate intersection point
       let xDelta = p1.x - p0.x;
       let yDelta = p1.y - p0.y;
       let zDelta = p1.z - p0.z;
       let outcode;
       let endpoint;
-
-      if (out0 != INSIDE) {
+      
+      // Determine which endpoint is outside of the view
+      if(out0 != INSIDE) {
         outcode = out0;
         endpoint = {x: p0.x, y: p0.y, z: p0.z};
       } else {
@@ -294,24 +304,23 @@ class Renderer {
         endpoint = {x: p1.x, y: p1.y, z: p1.z};
       }
 
+      // Send endpoint outside of view to be given a new intersection point
       endpoint = this.calculateEndpoint(p0.x, p1.x, xDelta, p0.y, p1.y, yDelta, p0.z, p1.z, zDelta, z_min, outcode, endpoint);
-
-      // Replace outside point with intersection point
-      if (outcode === out0) {
-        p0.x = endpoint.x;
-        p0.y = endpoint.y;
-        p0.z = endpoint.z;
-        out0 = this.outcodePerspective(p0, z_min);
-        result = {pt0: p0, pt1: line.pt1};
+      
+      // Add new endpoint to clippedLine
+      if(out0 != INSIDE) {
+        clippedLine.pt0.x = endpoint.x;
+        clippedLine.pt0.y = endpoint.y;
+        clippedLine.pt0.z = endpoint.z;
       } else {
-        p1.x = endpoint.x;
-        p1.y = endpoint.y;
-        p1.z = endpoint.z;
-        out1 = this.outcodePerspective(p1, z_min);
-        result = {pt0: line.pt0, pt1: p1};
+        clippedLine.pt1.x = endpoint.x;
+        clippedLine.pt1.y = endpoint.y;
+        clippedLine.pt1.z = endpoint.z;
       }
-    }
 
+    }
+    
+    result = clippedLine;
     return result;
   }
 
