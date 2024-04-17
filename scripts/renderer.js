@@ -1,6 +1,7 @@
 import * as CG from "./transforms.js";
 import { Matrix, Vector } from "./matrix.js";
 
+const INSIDE = 0; // binary 000000
 const LEFT = 32; // binary 100000
 const RIGHT = 16; // binary 010000
 const BOTTOM = 8; // binary 001000
@@ -18,7 +19,7 @@ class Renderer {
     this.canvas.height = canvas.height;
     this.ctx = this.canvas.getContext("2d");
     this.scene = this.processScene(scene);
-    this.enable_animation = true; // <-- disabled for easier debugging; enable for animation
+    this.enable_animation = false; // <-- disabled for easier debugging; enable for animation
     this.start_time = null;
     this.prev_time = null;
   }
@@ -40,26 +41,16 @@ class Renderer {
 
     let rotateMatrix = new Matrix(3, 3);
     rotateMatrix.values = [
-      [
-        Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)),
-        v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)),
-        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta),
-      ],
-      [
-        v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta),
-        Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)),
-        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta),
-      ],
-      [
-        v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta),
-        v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta),
-        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta)),
-      ],
+      [Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)), v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)), v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta)],
+      [v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta), Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)), v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta)],
+      [v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta), v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta), Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta))]
     ];
 
     this.scene.view.srp = this.scene.view.srp.subtract(this.scene.view.prp);
     this.scene.view.srp = Matrix.multiply([rotateMatrix, this.scene.view.srp]);
     this.scene.view.srp = this.scene.view.srp.add(this.scene.view.prp);
+
+    this.draw();
   }
 
   //
@@ -74,26 +65,16 @@ class Renderer {
 
     let rotateMatrix = new Matrix(3, 3);
     rotateMatrix.values = [
-      [
-        Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)),
-        v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)),
-        v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta),
-      ],
-      [
-        v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta),
-        Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)),
-        v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta),
-      ],
-      [
-        v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta),
-        v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta),
-        Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta)),
-      ],
+      [Math.cos(theta) + Math.pow(v.x, 2) * (1 - Math.cos(theta)), v.x * v.y * (1 - Math.cos(theta) - v.z * Math.sin(theta)), v.x * v.z * (1 - Math.cos(theta)) + v.y * Math.sin(theta)],
+      [v.y * v.x * (1 - Math.cos(theta)) + v.z * Math.sin(theta), Math.cos(theta) + Math.pow(v.y, 2) * (1 - Math.cos(theta)), v.y * v.z * (1 - Math.cos(theta)) - v.x * Math.sin(theta)],
+      [v.z * v.x * (1 - Math.cos(theta)) - v.y * Math.sin(theta), v.z * v.y * (1 - Math.cos(theta)) + v.x * Math.sin(theta), Math.cos(theta) + Math.pow(v.z, 2) * (1 - Math.cos(theta))]
     ];
 
     this.scene.view.srp = this.scene.view.srp.subtract(this.scene.view.prp);
     this.scene.view.srp = Matrix.multiply([rotateMatrix, this.scene.view.srp]);
     this.scene.view.srp = this.scene.view.srp.add(this.scene.view.prp);
+
+    this.draw();
   }
 
   // A key down
@@ -106,6 +87,8 @@ class Renderer {
 
     this.scene.view.prp = this.scene.view.prp.subtract(u);
     this.scene.view.srp = this.scene.view.srp.subtract(u);
+
+    this.draw();
   }
 
   // D key down
@@ -118,6 +101,8 @@ class Renderer {
 
     this.scene.view.prp = this.scene.view.prp.add(u);
     this.scene.view.srp = this.scene.view.srp.add(u);
+
+    this.draw();
   }
 
   // S key down
@@ -128,6 +113,8 @@ class Renderer {
 
     this.scene.view.prp = this.scene.view.prp.add(n);
     this.scene.view.srp = this.scene.view.srp.add(n);
+
+    this.draw();
   }
 
   // W key down
@@ -138,6 +125,8 @@ class Renderer {
 
     this.scene.view.prp = this.scene.view.prp.subtract(n);
     this.scene.view.srp = this.scene.view.srp.subtract(n);
+
+    this.draw();
   }
 
   //
@@ -181,9 +170,14 @@ class Renderer {
         for (ev = 0; ev < edges.length - 1; ev++) {
           let vert_1 = vertices[edges[ev]];
           let vert_2 = vertices[edges[ev + 1]];
-
-          let viewport_1 = Matrix.multiply([viewport, mper, vert_1]);
-          let viewport_2 = Matrix.multiply([viewport, mper, vert_2]);
+          let line = {pt0: vert_1, pt1: vert_2};
+          let z_min = (-1*this.scene.view.clip[4])/this.scene.view.clip[5]; // -near/far;
+          let clippedLine = this.clipLinePerspective(line, z_min);
+          
+          // check if clipped line is not null, then draw
+          if (clippedLine != null) {
+            let viewport_1 = Matrix.multiply([viewport, mper, clippedLine.pt0]);
+            let viewport_2 = Matrix.multiply([viewport, mper, clippedLine.pt1]);
 
           //convert from Homogenous to cartesian
           this.drawLine(
@@ -192,6 +186,7 @@ class Renderer {
             viewport_2.x / viewport_2.w,
             viewport_2.y / viewport_2.w
           );
+          }
         }
       }
     }
@@ -219,6 +214,46 @@ class Renderer {
     }
     return outcode;
   }
+  
+  // Finds new endpoint to clip line
+  calculateEndpoint(x0, x1, xDelta, y0, y1, yDelta, z0, z1, zDelta, z_min, outcode, endpoint) {
+    let t;
+    let leftAND = outcode & LEFT;
+    let rightAND = outcode & RIGHT;
+    let bottomAND = outcode & BOTTOM;
+    let topAND = outcode & TOP;
+    let nearAND = outcode & NEAR;
+    let farAND = outcode & FAR;
+    
+    // Find which plane to clip against, calculate t
+    if (leftAND === LEFT) {
+      t = (-x0 + z0) / (xDelta - zDelta);
+    } else if (rightAND === RIGHT) {
+      t = (x0 + z0) / (-xDelta - zDelta);
+    } else if (bottomAND === BOTTOM) {
+      t = (-y0 + z0) / (yDelta - zDelta);
+    } else if (topAND === TOP) {
+      t = (y0 + z0) / (-yDelta - zDelta);
+    } else if (nearAND === NEAR) {
+      t = (z0 - z_min) / -zDelta;
+    } else if (farAND === FAR) {
+      t = (-z0 - 1) / zDelta;
+    }
+    
+    // Assign new x,y,z values for the new endpoint
+    endpoint.x = this.parametric(t, x0, x1);
+    endpoint.y = this.parametric(t, y0, y1);
+    endpoint.z = this.parametric(t, z0, z1);
+    
+    return endpoint;
+  }
+
+  // Calculate the parametric equation with given variables
+  parametric(t, var0, var1) {
+    // var = var0 + t * delta(var)
+    let delta = var1 - var0;
+    return var0 + t * delta;
+  }
 
   // Clip line - should either return a new line (with two endpoints inside view volume)
   //             or null (if line is completely outside view volume)
@@ -231,7 +266,51 @@ class Renderer {
     let out0 = this.outcodePerspective(p0, z_min);
     let out1 = this.outcodePerspective(p1, z_min);
 
-    // TODO: implement clipping here!
+    while (true) {
+      // Both endpoints inside, accept
+      if (out0 === INSIDE && out1 === INSIDE) {
+        result = {pt0: line.pt0, pt1: line.pt1};
+        break;
+      }
+
+      // Both endpoints share an outside region, reject
+      if (out0 & out1) {
+        // keeps result = null;
+        break;
+      }
+
+      // One endpoint outside, calculate intersection point
+      let xDelta = p1.x - p0.x;
+      let yDelta = p1.y - p0.y;
+      let zDelta = p1.z - p0.z;
+      let outcode;
+      let endpoint;
+
+      if (out0 != INSIDE) {
+        outcode = out0;
+        endpoint = {x: p0.x, y: p0.y, z: p0.z};
+      } else {
+        outcode = out1;
+        endpoint = {x: p1.x, y: p1.y, z: p1.z};
+      }
+
+      endpoint = this.calculateEndpoint(p0.x, p1.x, xDelta, p0.y, p1.y, yDelta, p0.z, p1.z, zDelta, z_min, outcode, endpoint);
+
+      // Replace outside point with intersection point
+      if (outcode === out0) {
+        p0.x = endpoint.x;
+        p0.y = endpoint.y;
+        p0.z = endpoint.z;
+        out0 = this.outcodePerspective(p0, z_min);
+        result = {pt0: p0, pt1: line.pt1};
+      } else {
+        p1.x = endpoint.x;
+        p1.y = endpoint.y;
+        p1.z = endpoint.z;
+        out1 = this.outcodePerspective(p1, z_min);
+        result = {pt0: line.pt0, pt1: p1};
+      }
+    }
 
     return result;
   }
